@@ -1,3 +1,3 @@
-# HelloWorld
-trial
-change - 1
+# linux-admin-digest-shell
+
+The world of Linux/Unix Admins is very much vertile these days.
