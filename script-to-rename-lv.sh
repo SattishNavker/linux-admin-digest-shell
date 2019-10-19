@@ -42,6 +42,6 @@ echo " Step - 7 : Change ownership of mount"
 
 chown $USER:$GROUP $NEW-MOUNT # some of us might want to chown mounts, depending on your enviroments
 
-echo " Step - 7 : Verification of changes"
+echo " Step - 8 : Verification of changes"
 
 df -h $NEW-MOUNT;echo;ls -ld $NEW-MOUNT;echo;cat /etc/fstab | grep $NEW-MOUNT
