@@ -20,6 +20,11 @@ $NEW-MOUNT=/abc  #or /xyz #replace it with your FS
 #   mkdir $NEW-Mount
 # fi
 
+# lvs | grep -i $OLD-LV
+# vgs | grep -i VG -- old/new ?
+#
+# lvs | grep -i $NEW-LV
+
 echo " Step - 1 : Unmount target file-system to be renamed, be safe "
 
 umount $OLD-MOUNT
