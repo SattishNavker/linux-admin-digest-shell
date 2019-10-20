@@ -13,6 +13,13 @@ $OLD-MOUNT=/xyz  #replace it with your FS
 $NEW-MOUNT=/abc  #or /xyz #replace it with your FS
 #if you want to USE the same old-Mount then keep Mount-name same as that of the OLD-MOUNT, ex: here it is /xyz
 
+#echo " Pre-checks Step -- mntpoint / lv - vg / user / "
+# if [ -d $NEW-MOUNT ]
+#   echo "directory present"
+# else
+#   mkdir $NEW-Mount
+# fi
+
 echo " Step - 1 : Unmount target file-system to be renamed, be safe "
 
 umount $OLD-MOUNT
