@@ -14,7 +14,7 @@ OLDMOUNT="/xyz"  #replace it with your FS
 NEWMOUNT="/abc"  #or /xyz #replace it with your FS
 #if you want to USE the same old-Mount then keep Mount-name same as that of the OLD-MOUNT, ex: here it is /xyz
 
-echo " Pre-checks Step-1 -- mount-point / User / Group "
+echo " Pre-checks : mount-point / User / Group "
  if [ -d $NEWMOUNT ]; then
    echo "Mount Directory present"
  else
