@@ -3,7 +3,7 @@
 #
 # Here you can change variables as per your requirements.
 # This script can also be made interactive but it makes no much difference.
-#
+# Script should be executed as root user
 #
 
 USERX=`cat /etc/passwd | grep xyz | awk -F: '{ print $1 }'` #or hardcode fixed username
@@ -14,11 +14,32 @@ OLDMOUNT="/xyz"  #replace it with your FS
 NEWMOUNT="/abc"  #or /xyz #replace it with your FS
 #if you want to USE the same old-Mount then keep Mount-name same as that of the OLD-MOUNT, ex: here it is /xyz
 
-echo " Pre-checks Step-1 -- mntpoint / lv - vg / user / "
+echo " Pre-checks Step-1 -- mount-point / User / Group "
  if [ -d $NEWMOUNT ]; then
-   echo "directory present"
+   echo "Mount Directory present"
  else
    mkdir $NEWMOUNT
+ fi
+
+ if grep $USERX /etc/passwd; then
+   echo "USER entry exists"
+ else
+   echo "USER is absent -- exit"
+   exit
+ fi
+
+ if grep $GROUPX /etc/group; then
+   echo "GROUP entry exists"
+ else
+   echo "GROUP is absent -- exit"
+   exit
+ fi
+
+ if lvs | grep $OLDFS ; then
+   echo "LV entry exists"
+ else
+   echo "LV is absent -- exit"
+   exit
  fi
 
 echo " Step - 1 : Unmount target file-system to be renamed, be safe "
