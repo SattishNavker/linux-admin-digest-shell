@@ -3,9 +3,14 @@
 #
 # Cluster on PRD side (site-1 2-node) and cluster on DR side (site-2 2-node) == here to roleswap need additional TERMINATE and RECREATE scripts
 # Cloning is within same site node-1 (PRD-DB) cloned to node-2 (Batch-DBs-3) -- 3 times a day (Let service be running on any PRD/DR sites)
+# Only PRD-DB gets roleswaped; rest all are cloned with help of cloning-solution (below script) to batch-DBs on second node of cluster
 #
-# MAPPINGS file == 4 columns == batch-dg; prd-dg; shared-batch-disk; batch-disk-label
-# CLONE file == 2 columns == shared-prd-disk; shared-batch-disk
+# MAPPINGS file == 4 columns == batch-dg; prd-dg; shared-batch-disk; batch-disk-label (TOT=6)
+# CLONE file == 2 columns == shared-prd-disk; shared-batch-disk (TOT=6)
+#
+
+#
+# Three such scripts - one per batch DB ( and Three more for another site == TOT 6 scripts with minute differences )
 #
 
 LOCATION=""
@@ -20,8 +25,8 @@ VXEDIT="/usr/sbin/vxedit"
 SSH="/usr/bin/ssh"
 HAGRP="/opt/VRTS/bin/hagrp"
 SE_UTILITIES="/usr/symcli/bin/"
-DEVICE_FILE="/opt/scripts/clones/MAPPINGS/$LOCALHOSTNAME.XX03"
-CLONE_FILE="/opt/scripts/clones/CLONEFILES/YY01_to_XX03"
+DEVICE_FILE="/path/to/MAPPINGS/$LOCALHOSTNAME.XX03"
+CLONE_FILE="/path/to/CLONEFILES/YY01_to_XX03"
 LOCALIP=`$NSLOOKUP $LOCALHOSTNAME|grep -v '#53'|grep'Address'|cut -d ":" -f2|sed 's/ //'`
 NETWORK=`echo $LOCALIP|cut -d'.' -f1,2`
 
@@ -144,7 +149,7 @@ VH)  # or NL) vice versa based on scenario
     if [[ "PROD_NODE" = "yydb11" ]]; then PROD_LOCATION="NL";fi
 
     case $PROD_LOCATION in
-      
+
       VH)
           CLUSTER_NAME="xyz"
           echo "PROD NODE $PROD_NODE, NETWORK $NETWORK, LOCATION $LOCATION, NODE $NODE"
