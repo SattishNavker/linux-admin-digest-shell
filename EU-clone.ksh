@@ -1,4 +1,13 @@
 #!/usr/bin/ksh
+
+#
+# Cluster on PRD side (site-1 2-node) and cluster on DR side (site-2 2-node) == here to roleswap need additional TERMINATE and RECREATE scripts
+# Cloning is within same site node-1 (PRD-DB) cloned to node-2 (Batch-DBs-3) -- 3 times a day (Let service be running on any PRD/DR sites)
+#
+# MAPPINGS file == 4 columns == batch-dg; prd-dg; shared-batch-disk; batch-disk-label
+# CLONE file == 2 columns == shared-prd-disk; shared-batch-disk
+#
+
 LOCATION=""
 LOCALHOSTNAME=`hostname`
 NSLOOKUP="/usr/bin/nslookup"
@@ -81,6 +90,7 @@ IMPORT_UPDATEID ()
    echo ">>Import the DiskGroup and Update the Clone ID and Update access"
 
    $VXDG -n RS-XX03datadg -o useclonedev=on -o tag=XX03datadg -o updateid import RS-YY01datadg
+
    if_error ">>>Error : Problem in Import RS-XX03datadg operation"
    for volume in `$VXPRINT -htg RS-XX03datadg|grep "^v"|awk '{print $2}'`
    do
@@ -89,6 +99,7 @@ IMPORT_UPDATEID ()
    if_error ">>>Error : Problem in vxedit RS-XX03datadg Operation"
 
    $VXDG -n RS-XX03logdg -o useclonedev=on -o tag=XX03logdg -o updateid import RS-YY01logdg
+
    if_error ">Error : Problem in Import RS-XX03logdg operation"
    for volume in `$VXPRINT -htg RS-XX03logdg|grep "^v"|awk '{print $2}'`
    do
@@ -100,15 +111,66 @@ IMPORT_UPDATEID ()
 }
 DEPORT_DISKGROUPS ()
 {
+  echo "Deport the Diskgroup"
+  $VXDG deport RS-XX03datadg
+  if_error "Error: Problem in deport RS-XX03datadg operation"
+  $VXDG deport RS-XX03logdg
+  if_error "Error: Problem in deport RS-XX03logdg operation"
+  echo "End Deport the Diskgroup"
 }
 PERFORM_SRDF_SPLIT ()
 {
+  echo "SRDF Split...."
+  $SE_UTILITIES/symrdf -g XXXXXXXX03_VH split -nop
+  #$SE_UTILITIES/symrdf -g XXXXXXXX03_VH split -force -nop
+  #$SE_UTILITIES/symrdf -g XXXXXXXX03_VH split -rdfg 25 -force -symforce -nop
+  echo "End of SRDF split"
 }
 PERFORM_SRDF_ESTABLISH ()
 {
+  echo "SRDF Establish...."
+  $SE_UTILITIES/symrdf -g XXXXXXXX03_VH establish -nop
+  echo "End of SRDF Establish"
 }
 
 if [[ "$LOCALHOSTNAME" = "xxdb01" && $NETWORK ="x.y" || "$LOCALHOSTNAME" = "xxdb02" && $NETWORK = "x." ]]; then LOCATION="VH":SID="0001xxxxxxxx";fi
 if [[ "$LOCALHOSTNAME" = "yydb11" && $NETWORK ="x.y" ]]; then LOCATION="NL";SID="0001yyyyyyyy";fi
+
 case $LOCATION in
-VH)
+
+VH)  # or NL) vice versa based on scenario
+    PROD_NODE=`$HAGRP -state YYYYYY03 | egrep -i 'ONLINE|PARTIAL'|awk '{print $3}'|cut -d':' -f2`
+    if [[ "PROD_NODE" = "xxdb01" || "PROD_NODE" = "xxdb02" ]]; then PROD_LOCATION="VH";fi
+    if [[ "PROD_NODE" = "yydb11" ]]; then PROD_LOCATION="NL";fi
+
+    case $PROD_LOCATION in
+      
+      VH)
+          CLUSTER_NAME="xyz"
+          echo "PROD NODE $PROD_NODE, NETWORK $NETWORK, LOCATION $LOCATION, NODE $NODE"
+          if [[ `$SE_UTILITIES/symdg list|grep XXXXXXXX03_VH|awk '{print $2}'` = "RDF1" ]];
+            then
+              OFFLINE_CLUSTER $CLUSTER_NAME
+              $HAGRP -freeze YYYYYY03   ### here YY stands for batch-DB (SRDF/Veritas DG's)
+              echo "PROD LOCATION :: $PROD_LOCATION"
+              #DEPORT_DISKGROUPS
+              PERFORM_SRDF_SPLIT
+              PERFORM_CLONE $SID
+              VERITAS_CONTROL
+              CLEAR_IMPORT_BIT
+              REMOVE_VERITAS_TAG
+              SET_VERITAS_TAG
+              IMPORT_UPDATEID
+              DEPORT_DISKGROUPS
+              PERFORM_SRDF_ESTABLISH
+              $HAGRP -unfreeze YYYYYY03
+              OFFLINE_CLUSTER
+              echo "Online the YYYYYY03 Cluster now on $NODE"
+              $HAGRP -online YYYYYY03 -sys xxdb02  ## or use $NODE for -sys arg
+            else
+              if_error "Error: NOT a Supported configuration"
+          fi
+        ;;
+    esac
+    ;;
+esac
