@@ -11,8 +11,8 @@ VXEDIT="/usr/sbin/vxedit"
 SSH="/usr/bin/ssh"
 HAGRP="/opt/VRTS/bin/hagrp"
 SE_UTILITIES="/usr/symcli/bin/"
-YEST_DEVICE_FILE="/opt/scripts/clones/MAPPINGS/$LOCALHOSTNAME.XX03"
-YEST_DEVICE_FILE="/opt/scripts/clones/CLONEFILES/YY01_to_XX03"
+DEVICE_FILE="/opt/scripts/clones/MAPPINGS/$LOCALHOSTNAME.XX03"
+CLONE_FILE="/opt/scripts/clones/CLONEFILES/YY01_to_XX03"
 LOCALIP=`$NSLOOKUP $LOCALHOSTNAME|grep -v '#53'|grep'Address'|cut -d ":" -f2|sed 's/ //'`
 NETWORK=`echo $LOCALIP|cut -d'.' -f1,2`
 
@@ -23,7 +23,7 @@ if_error ()
       exit $?
   fi
 }
-OFFLINE_YESTCLUSTER ()
+OFFLINE_CLUSTER ()
 {
   echo "Offline the ServiceGroup XX03 on $1"
   #OFFLINE_CLUS=`$HAGRP -state XX03|egrep 'ONLINE|PARTIAL'|cut -d":" -f1|awk '{print $NF}'`
@@ -38,9 +38,9 @@ OFFLINE_YESTCLUSTER ()
 PERFORM_CLONE ()
 {
    echo "Perform Clone Operations now"
-   $SE_UTILITIES/symclone -sid $1 -symforce -f $YEST_CLONE_FILE terminate -nop
-   $SE_UTILITIES/symclone -sid $1 -f $YEST_CLONE_FILE -force recreate -precopy -nop
-   $SE_UTILITIES/symclone -sid $1 -f $YEST_CLONE_FILE activate -nop
+   $SE_UTILITIES/symclone -sid $1 -symforce -f $CLONE_FILE terminate -nop
+   #$SE_UTILITIES/symclone -sid $1 -f $CLONE_FILE -force recreate -precopy -nop
+   $SE_UTILITIES/symclone -sid $1 -f $CLONE_FILE activate -nop
    if_error " Error: Problem in Clone Operation"
    sleep 30
    echo "End Perform Clone Operations now"
@@ -53,7 +53,7 @@ VERITAS_CONTROL ()
 }
 CLEAR_IMPORT_BIT ()
 {
-  for DEVICE in `/bin/cat $YEST_DEVICE_FILE|awk '{print $3}'`
+  for DEVICE in `/bin/cat $DEVICE_FILE|awk '{print $3}'`
   do
         echo "CLearing Import Tag for $DEVICE"
         $VXDISK clearimport $DEVICE
@@ -61,7 +61,7 @@ CLEAR_IMPORT_BIT ()
 }
 REMOVE_VERITAS_TAG ()
 {
-   for DEVICE in 'awk '{print $3 ":" $3}' $YEST_DEVICE_FILE
+   for DEVICE in `awk '{print $3 ":" $3}' $DEVICE_FILE`
    do
         echo "Removing Veritas tag for `echo $DEVICE|awk -F":" '{print $1 \" \" $2}'`"
         $VXDISK rmtag `echo $DEVICE|awk -F":" '{print $1 " " $2}'`
@@ -69,7 +69,7 @@ REMOVE_VERITAS_TAG ()
 }
 SET_VERITAS_TAG ()
 {
-   for DEVICE in 'awk '{print $3 ":" $3}' $YEST_DEVICE_FILE
+   for DEVICE in `awk '{print $3 ":" $3}' $DEVICE_FILE`
    do
         echo "Setting Veritas tag for `echo $DEVICE|awk -F":" '{print $1 \" \" $2}'`"
         $VXDISK settag `echo $DEVICE|awk -F":" '{print $1 " " $2}'`
