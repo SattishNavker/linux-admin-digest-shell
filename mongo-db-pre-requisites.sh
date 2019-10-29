@@ -69,6 +69,10 @@ EOT
 chmod 644 /etc/security/limits.d/95-$MONGO_USER.conf
 chown root:root /etc/security/limits.d/95-$MONGO_USER.conf
 
+# Some setups might require to configure PAM settings as below :
+# echo 'session required pam_limits.so' >> /etc/pam.d/su
+# echo 'session required pam_limits.so' >> /etc/pam.d/login
+
 echo " Step-7 : ------ Disk I/O scheduler and udev rules settings ------- "
 echo ACTION=="add|change", KERNEL=="sd*[!0-9]|sr*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="noop", ATTR{bdi/read_ahead_kb}="0" >> /etc/udev/rules.d/99-$MONGO_USER.rules
 
