@@ -4,7 +4,7 @@
 APPDIR=/opt/app # change application path as per your standards
 VARLOG=/var/log/mongodb-mms-automation
 VARLIB=/var/lib/mongodb-mms-automation
-MONGO_USER=xyz  #here username is harcoded .. but ..
+MONGO_USER=xyz  #here username is harcoded, you might want to live with "mongo" user which comes by default .. but ..
 # another way to get Username can be - 1> accepting and handling it as argument to script; ex : ./mongo-db-pre-requisities.sh <user>
 # 2> get username from /etc/passwd or from AD, if you have common username across multiple servers..there can multiple other ways to this part
 
@@ -75,7 +75,9 @@ echo ACTION=="add|change", KERNEL=="sd*[!0-9]|sr*", ATTR{queue/rotational}=="0",
 echo " Step-8 : ------ Creating directories and setting SELinux properties ------- "
 
 mkdir -p $APPDIR/mongodb/log $APPDIR/mongodb-pid $VARLIB $VARLOG
+# May be you will need following additions based on your enviroment = mkdir -p /mongod/{data,log,dump} $APPDIR/{mongodb-pid,data}
 chown $MONGO_USER:grp $APPDIR $APPDIR/mongodb $APPDIR/mongodb/log $APPDIR/mongodb-pid $VARLIB $VARLOG
+#In addition of ownership changes, you may also choose to use "chmod" based on your umask and other requirements
 
 semanage fcontext -a -t mongod_log_t $APPDIR/mongodb/log.*
 chcon -Rv -u system_u -t mongod_log_t $APPDIR/mongodb/log
@@ -89,3 +91,12 @@ restorecon -R -v $APPDIR/mongodb-pid
 ls -lZ $APPDIR/mongodb-pid $APPDIR/mongodb/log
 # to check ownership of directories
 ls -ld $VARLIB $VARLOG
+
+echo " Step-9 : ---- File-system creation ---- "
+# here you can add your file-system creation code or can have a separate script for same
+# sample code steps given below
+# 1 > Take backup of existing file-system to avoid mishaps
+# 2 > Make sure you have required free space or free disks for file-system
+# 3 > Create required LV's and format it as mkfs.xfs
+# 4 > Update /etc/fstab entries with new file-system and make sure it has correct ownership and permissions
+# 5 > Mount and start using whole setup for mongoDB (for opsmanger or for its nodes)
