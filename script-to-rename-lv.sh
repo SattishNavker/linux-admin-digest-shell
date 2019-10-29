@@ -6,6 +6,13 @@
 # Script should be executed as root user
 #
 
+#
+# exit codes
+# 100 = USER is absent
+# 101 = GROUP is absent
+# 102 = LV (logical volume) is absent
+#
+
 USERX=`cat /etc/passwd | grep xyz | awk -F: '{ print $1 }'` #or hardcode fixed username
 GROUPX=`cat /etc/group | grep xyz | awk -F: '{ print $1 }'` #or hardcode fixed groupname
 OLDFS="/dev/vg/oldlv1"  #replace it with your exact names
@@ -25,21 +32,21 @@ echo " Pre-checks : mount-point / User / Group "
    echo "USER entry exists"
  else
    echo "USER is absent -- exit"
-   exit
+   exit 100
  fi
 
  if grep $GROUPX /etc/group; then
    echo "GROUP entry exists"
  else
    echo "GROUP is absent -- exit"
-   exit
+   exit 101
  fi
 
  if lvs | grep $OLDFS ; then
    echo "LV entry exists"
  else
    echo "LV is absent -- exit"
-   exit
+   exit 102
  fi
 
 echo " Step - 1 : Unmount target file-system to be renamed, be safe "
