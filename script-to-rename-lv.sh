@@ -82,7 +82,9 @@ mount -a # mount -a will mount all FS mentioned in /etc/fstab, if you dont want 
 
 echo " Step - 7 : Change ownership of mount"
 
-chown $USERX:$GROUPX $NEWMOUNT # some of us might want to chown mounts, depending on your enviroments
+chown $USERX:$GROUPX $NEWMOUNT #|| exit 103
+# some of us might want to chmod mounts, depending on your enviroments. Sample-below :
+# /bin/chmod 644 $NEWMOUNT || exit 104
 
 echo " Step - 8 : Verification of changes"
 
