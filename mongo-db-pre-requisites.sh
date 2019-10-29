@@ -92,9 +92,9 @@ ls -lZ $APPDIR/mongodb-pid $APPDIR/mongodb/log
 # to check ownership of directories
 ls -ld $VARLIB $VARLOG
 
-echo " Step-9 : ---- File-system creation ---- "
-# here you can add your file-system creation code or can have a separate script for same
-# sample code steps given below
+echo " Step-9 : ---- File-system creation ---- guidelines "
+# here you can add your file-system creation code guidelines or can have a separate script for same
+# sample steps given below
 # 1 > Take backup of existing file-system to avoid mishaps
 # 2 > Make sure you have required free space or free disks for file-system
 # 3 > Create required LV's and format it as mkfs.xfs
