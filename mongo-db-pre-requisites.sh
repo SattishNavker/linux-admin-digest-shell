@@ -1,5 +1,9 @@
 #!/bin/bash
-MONGO_USER=xyz
+# This script will need root access
+
+MONGO_USER=xyz  #here username is harcoded .. but ..
+# another way to get Username can be - 1> accepting and handling it as argument to script; ex : ./mongo-db-pre-requisities.sh <user>
+# 2> get username from /etc/passwd or from AD, if you have common username across multiple servers..there can multiple other ways to this part
 
 echo " Step-1 : ------ Pre-requisite RPM packages installation ------- "
 
