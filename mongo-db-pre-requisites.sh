@@ -85,4 +85,7 @@ semanage fcontext -a -t mongod_var_run_t $APPDIR/mongodb-pid.*
 chcon -Rv -u system_u -t mongod_var_run_t $APPDIR/mongodb-pid
 restorecon -R -v $APPDIR/mongodb-pid
 
-# to check if context is changed use ==>> # ls -lZ $APPDIR/mongodb-pid $APPDIR/mongodb/log
+# to check context and ownership
+ls -lZ $APPDIR/mongodb-pid $APPDIR/mongodb/log
+# to check ownership of directories
+ls -ld $VARLIB $VARLOG
