@@ -1,6 +1,9 @@
 #!/bin/bash
 # This script will need root access
 
+APPDIR=/opt/app # change application path as per your standards
+VARLOG=/var/log/mongodb-mms-automation
+VARLIB=/var/lib/mongodb-mms-automation
 MONGO_USER=xyz  #here username is harcoded .. but ..
 # another way to get Username can be - 1> accepting and handling it as argument to script; ex : ./mongo-db-pre-requisities.sh <user>
 # 2> get username from /etc/passwd or from AD, if you have common username across multiple servers..there can multiple other ways to this part
@@ -68,3 +71,18 @@ chown root:root /etc/security/limits.d/95-$MONGO_USER.conf
 
 echo " Step-7 : ------ Disk I/O scheduler and udev rules settings ------- "
 echo ACTION=="add|change", KERNEL=="sd*[!0-9]|sr*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="noop", ATTR{bdi/read_ahead_kb}="0" >> /etc/udev/rules.d/99-$MONGO_USER.rules
+
+echo " Step-8 : ------ Creating directories and setting SELinux properties ------- "
+
+mkdir -p $APPDIR/mongodb/log $APPDIR/mongodb-pid $VARLIB $VARLOG
+chown $MONGO_USER:grp $APPDIR $APPDIR/mongodb $APPDIR/mongodb/log $APPDIR/mongodb-pid $VARLIB $VARLOG
+
+semanage fcontext -a -t mongod_log_t $APPDIR/mongodb/log.*
+chcon -Rv -u system_u -t mongod_log_t $APPDIR/mongodb/log
+restorecon -R -v $APPDIR/mongodb/log
+
+semanage fcontext -a -t mongod_var_run_t $APPDIR/mongodb-pid.*
+chcon -Rv -u system_u -t mongod_var_run_t $APPDIR/mongodb-pid
+restorecon -R -v $APPDIR/mongodb-pid
+
+# to check if context is changed use ==>> # ls -lZ $APPDIR/mongodb-pid $APPDIR/mongodb/log
