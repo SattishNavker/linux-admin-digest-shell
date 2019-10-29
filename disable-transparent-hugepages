@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#
+# Transparent huge pages should already be disabled at boot time but MongoDB checks below files :
+# /sys/kernel/mm/redhat_transparent_hugepage/enabled  ++  /sys/kernel/mm/redhat_transparent_hugepage/defrag
+# and issues warning when its set to [always]. This is to stop the start-up errors that MongoDB throws
+#
+
+. /etc/init.d/functions
+PATH=/sbin:/bin:/usr/bin:/usr/sbin
+_RHEL_VERSION_=$(cat /etc/redhat-release | awk '{print $7}' | cut -d '.' -f 1)
+_THP_PATH_='/sys/kernel/mm/redhat_transparent_hugepage'
+
+case "$1" in
+  start)
+    echo 'never' > ${_THP_PATH_}/enabled
+    echo 'never' > ${_THP_PATH_}/defrag
+
+case ${_RHEL_VERSION_} in
+    6)
+      echo 'no' > ${_THP_PATH_}/khugepaged/defrag
+      ;;
+    7)
+      echo 0 > ${_THP_PATH_}/khugepaged/defrag
+      ;;
+esac
+;;
+esac

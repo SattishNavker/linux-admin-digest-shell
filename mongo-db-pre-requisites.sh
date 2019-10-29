@@ -99,4 +99,4 @@ echo " Step-9 : ---- File-system creation ---- "
 # 2 > Make sure you have required free space or free disks for file-system
 # 3 > Create required LV's and format it as mkfs.xfs
 # 4 > Update /etc/fstab entries with new file-system and make sure it has correct ownership and permissions
-# 5 > Mount and start using whole setup for mongoDB (for opsmanger or for its nodes)
+# 5 > Mount and start using whole setup for mongoDB == mongod / mongodb-mms-automation-agent
